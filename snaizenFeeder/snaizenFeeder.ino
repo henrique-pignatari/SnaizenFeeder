@@ -7,8 +7,6 @@
 #include <EEPROM.h>
 #include "RTClib.h"
 
-//teste
-
 boolean horariosConfigurados;
 
 void setup() {
