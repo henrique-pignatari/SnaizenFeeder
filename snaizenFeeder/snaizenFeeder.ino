@@ -7,8 +7,6 @@
 #include <EEPROM.h>
 #include "RTClib.h"
 
-//teste
-//mani tem q ta salvando essa merda
 boolean horariosConfigurados;
 
 void setup() {
