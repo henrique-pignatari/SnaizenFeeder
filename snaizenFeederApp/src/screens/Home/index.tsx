@@ -60,22 +60,20 @@ export function Home({navigation: {navigate}}: Props){
                 <ButtonAdd onPress={handleScheduleCreate}/>
             </View>
 
-            <View style={styles.content}>
-                <ListHeader title="Horarios agendados" subtitle="Total 3"/>
-                <FlatList
-                    data={schedules}
-                    keyExtractor={item => item.id}
-                    renderItem={({item})=> (
-                        <Schedule
-                            handlers={{handleScheduleEdit,handleScheduleDelete}}
-                            data={item}
-                        />
-                    )}
-                    ItemSeparatorComponent={() => <ListDivider/>}
-                    style={styles.schedules}
-                    showsVerticalScrollIndicator={false}
-                />
-            </View>
+            <ListHeader title="Horarios agendados" subtitle="Total 3"/>
+            <FlatList
+                data={schedules}
+                keyExtractor={item => item.id}
+                renderItem={({item})=> (
+                    <Schedule
+                        handlers={{handleScheduleEdit,handleScheduleDelete}}
+                        data={item}
+                    />
+                )}
+                ItemSeparatorComponent={() => <ListDivider/>}
+                style={styles.schedules}
+                showsVerticalScrollIndicator={false}
+            />
         </Background>
     )
 }
