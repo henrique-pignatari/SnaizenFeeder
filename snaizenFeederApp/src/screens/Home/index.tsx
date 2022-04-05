@@ -8,6 +8,7 @@ import { ListHeader } from "../../components/ListHeader";
 import { Profile } from "../../components/Profile";
 import { Schedule } from "../../components/Schedule";
 import { theme } from "../../global/styles/theme";
+import { useSchedules } from "../../hooks/schedules";
 
 import { styles } from "./styles";
 
@@ -18,20 +19,9 @@ type Props = {
 }
 
 export function Home({navigation: {navigate}}: Props){
-    const schedules = [
-        {
-            id: '1',
-            hour: '12:30',
-            weight: '2',
+    const teste = useSchedules();
 
-        },
-        {
-            id: '2',
-            hour: '10:30',
-            weight: '1',
-
-        }
-    ]
+    const schedules = teste.schedules.data;
 
     function handleScheduleCreate(){
         console.log("Criando um horario");
