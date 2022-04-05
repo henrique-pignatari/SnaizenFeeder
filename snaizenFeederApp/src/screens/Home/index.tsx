@@ -37,12 +37,14 @@ export function Home({navigation: {navigate}}: Props){
         console.log("Criando um horario");
     };
 
-    function handleScheduleEdit(){
+    function handleScheduleEdit(id: string){
         navigate("ScheduleEdit")
     };
     
-    function handleScheduleDelete(){
-        console.log("Deletando o horario")
+    function handleScheduleDelete(id : string){
+        console.log("Deletando o horario " + id);
+        let a: number = +id;
+        console.log(a)
     }
 
     const {on, primary} = theme.colors;
