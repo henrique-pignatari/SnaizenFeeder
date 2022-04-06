@@ -35,6 +35,36 @@ function SchedulesProvider({children}: SchedulesProviderProps){
             hour: '10:30',
             weight: '1',
 
+        },
+        {
+            id: '3',
+            hour: '10:30',
+            weight: '1',
+
+        },
+        {
+            id: '4',
+            hour: '10:30',
+            weight: '1',
+
+        },
+        {
+            id: '5',
+            hour: '10:30',
+            weight: '1',
+
+        },
+        {
+            id: '6',
+            hour: '10:30',
+            weight: '1',
+
+        },
+        {
+            id: '7',
+            hour: '10:30',
+            weight: '1',
+
         }
     ]} as Schedules);
 
