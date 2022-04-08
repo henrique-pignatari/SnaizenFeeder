@@ -16,11 +16,8 @@ type Props = {
     }
 }
 
-export function ScheduleEdit({route:{params:{id}}}: Props){
+export function ScheduleCreate({route:{params:{id}}}: Props){
     const {schedules} = useSchedules();
-    const schedule =schedules.data.find(item =>{return item.id === id}) as ScheduleProps;    
-    const [hour,minutes] = schedule.hour.split(':')
-    const weight = schedule.weight;
 
     return(
         <KeyboardAvoidingView
@@ -28,7 +25,7 @@ export function ScheduleEdit({route:{params:{id}}}: Props){
         >
             <ScrollView>
                 <Header
-                    title="Modificar o horario"
+                    title="Criar novo horario"
                 />
                 <View style={styles.container}>
                     <View style={styles.field}>
@@ -38,11 +35,11 @@ export function ScheduleEdit({route:{params:{id}}}: Props){
                             </Text>
 
                             <View style={styles.column}>
-                                <SmallInput maxLength={2} value={hour}/>
+                                <SmallInput maxLength={2}/>
                                 <Text style={styles.divider}>
                                     :
                                 </Text>
-                                <SmallInput maxLength={2} value={minutes}/>
+                                <SmallInput maxLength={2}/>
                             </View>
                         </View>
 
@@ -52,7 +49,7 @@ export function ScheduleEdit({route:{params:{id}}}: Props){
                             </Text>
 
                             <View style={styles.column}>
-                                <MediumInput maxLength={2} value={weight}/>
+                                <MediumInput maxLength={2}/>
                             </View>
                         </View>
                     </View>

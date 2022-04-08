@@ -5,8 +5,7 @@ import { Background } from "../../components/Background";
 import { ButtonAdd } from "../../components/ButtonAdd";
 import { ListDivider } from "../../components/ListDivider";
 import { ListHeader } from "../../components/ListHeader";
-import { Profile } from "../../components/Profile";
-import { Schedule } from "../../components/Schedule";
+import { Schedule, ScheduleProps } from "../../components/Schedule";
 import { theme } from "../../global/styles/theme";
 import { useSchedules } from "../../hooks/schedules";
 
@@ -19,22 +18,33 @@ type Props = {
 }
 
 export function Home({navigation: {navigate}}: Props){
-    const teste = useSchedules();
+    let {addSchedule,reagengeSchedules,schedules,setSchedules} = useSchedules();
 
-    const schedules = teste.schedules.data;
+    const [render,setRender] = useState(true);
+
+    function renderScreen(){
+        setRender(!render)
+    }
 
     function handleScheduleCreate(){
-        console.log("Criando um horario");
+        const sche = {
+            id: '',
+            hour: '06:35',
+            weight: '2'
+        };
+        setSchedules({data: reagengeSchedules(addSchedule(sche))})
+        renderScreen();
     };
 
     function handleScheduleEdit(id: string){
-        navigate("ScheduleEdit")
+        navigate("ScheduleEdit",{id: id})
     };
     
     function handleScheduleDelete(id : string){
-        console.log("Deletando o horario " + id);
         let a: number = +id;
-        console.log(a)
+        schedules.data.splice(a-1,1);
+        reagengeSchedules(schedules.data);
+        renderScreen()
     }
 
     const {on, primary} = theme.colors;
@@ -54,7 +64,7 @@ export function Home({navigation: {navigate}}: Props){
 
             <ListHeader title="Horarios agendados" subtitle="Total 3"/>
             <FlatList
-                data={schedules}
+                data={schedules.data}
                 keyExtractor={item => item.id}
                 renderItem={({item})=> (
                     <Schedule
