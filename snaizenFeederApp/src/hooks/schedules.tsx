@@ -28,7 +28,7 @@ type SchedulesProviderProps = {
 export const SchedulesContext = createContext({} as SchedulesContextData);
 
 function SchedulesProvider({children}: SchedulesProviderProps){
-    let [schedules, setSchedules] = useState<Schedules>({data:[
+    const [schedules, setSchedules] = useState<Schedules>({data:[
         {
             id: '1',
             hour: '12:30',

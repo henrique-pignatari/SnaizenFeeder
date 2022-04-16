@@ -27,13 +27,7 @@ export function Home({navigation: {navigate}}: Props){
     }
 
     function handleScheduleCreate(){
-        const sche = {
-            id: '',
-            hour: '06:35',
-            weight: '2'
-        };
-        setSchedules({data: reagengeSchedules(addSchedule(sche))})
-        renderScreen();
+        navigate('ScheduleCreate');
     };
 
     function handleScheduleEdit(id: string){
@@ -44,7 +38,7 @@ export function Home({navigation: {navigate}}: Props){
         let a: number = +id;
         schedules.data.splice(a-1,1);
         reagengeSchedules(schedules.data);
-        renderScreen()
+        renderScreen();
     }
 
     const {on, primary} = theme.colors;

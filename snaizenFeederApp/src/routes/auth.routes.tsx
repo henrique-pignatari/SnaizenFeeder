@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { theme } from "../global/styles/theme";
 import { Home } from "../screens/Home";
 import { ScheduleEdit } from "../screens/ScheduleEdit";
+import { ScheduleCreate } from "../screens/ScheduleCreate";
 
 const {Navigator, Screen} = createNativeStackNavigator();
 
@@ -24,6 +25,10 @@ export function AuthRoutes(){
             <Screen
                 name="ScheduleEdit"
                 component={ScheduleEdit}
+            />
+            <Screen
+                name="ScheduleCreate"
+                component={ScheduleCreate}
             />
         </Navigator>
     )

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { GestureHandlerRootView, RectButton, ScrollView } from "react-native-gesture-handler";
 import { Header } from "../../components/Header";
@@ -9,15 +9,27 @@ import { useSchedules } from "../../hooks/schedules";
 
 import { styles } from "./styles";
 type Props = {
-    route: {
-        params: {
-            id? : string;
-        }
-    }
+    navigation: {
+        navigate: Function
+    };
 }
 
-export function ScheduleCreate({route:{params:{id}}}: Props){
-    const {schedules} = useSchedules();
+export function ScheduleCreate({navigation: {navigate}}: Props){
+    const {schedules,addSchedule,reagengeSchedules,setSchedules} = useSchedules();
+    const [hour,setHour] = useState('');
+    const [minute,setMinute] = useState('');
+    const [weight,setWeight] = useState('');
+    
+    function createSchedule(){
+        const schedule = {
+            id: '',
+            hour: `${hour}:${minute}`,
+            weight,
+        };
+
+        setSchedules({data: reagengeSchedules(addSchedule(schedule))});
+        navigate('Home')
+    }
 
     return(
         <KeyboardAvoidingView
@@ -35,11 +47,17 @@ export function ScheduleCreate({route:{params:{id}}}: Props){
                             </Text>
 
                             <View style={styles.column}>
-                                <SmallInput maxLength={2}/>
+                                <SmallInput 
+                                    maxLength={2}
+                                    onChangeText={setHour}
+                                />
                                 <Text style={styles.divider}>
                                     :
                                 </Text>
-                                <SmallInput maxLength={2}/>
+                                <SmallInput 
+                                    maxLength={2}
+                                    onChangeText={setMinute}
+                                />
                             </View>
                         </View>
 
@@ -49,7 +67,10 @@ export function ScheduleCreate({route:{params:{id}}}: Props){
                             </Text>
 
                             <View style={styles.column}>
-                                <MediumInput maxLength={2}/>
+                                <MediumInput 
+                                    maxLength={2}
+                                    onChangeText={setWeight}    
+                                />
                             </View>
                         </View>
                     </View>
@@ -57,7 +78,10 @@ export function ScheduleCreate({route:{params:{id}}}: Props){
                         <RectButton 
                             style={styles.confirmButton}
                         >
-                            <Text style={styles.confirmText}>Confirmar</Text>
+                            <Text
+                                style={styles.confirmText}
+                                onPress={createSchedule}
+                            >Confirmar</Text>
                         </RectButton>
                     </GestureHandlerRootView>
                 </View>
