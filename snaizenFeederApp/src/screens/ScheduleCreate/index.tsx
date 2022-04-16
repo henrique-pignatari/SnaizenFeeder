@@ -3,7 +3,6 @@ import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { GestureHandlerRootView, RectButton, ScrollView } from "react-native-gesture-handler";
 import { Header } from "../../components/Header";
 import { MediumInput } from "../../components/MediumInputt";
-import { ScheduleProps } from "../../components/Schedule";
 import { SmallInput } from "../../components/SmallInput";
 import { useSchedules } from "../../hooks/schedules";
 
@@ -15,7 +14,7 @@ type Props = {
 }
 
 export function ScheduleCreate({navigation: {navigate}}: Props){
-    const {schedules,addSchedule,reagengeSchedules,setSchedules} = useSchedules();
+    const {addSchedule} = useSchedules();
     const [hour,setHour] = useState('');
     const [minute,setMinute] = useState('');
     const [weight,setWeight] = useState('');
@@ -27,7 +26,7 @@ export function ScheduleCreate({navigation: {navigate}}: Props){
             weight,
         };
 
-        setSchedules({data: reagengeSchedules(addSchedule(schedule))});
+        addSchedule(schedule);
         navigate('Home')
     }
 
@@ -68,7 +67,7 @@ export function ScheduleCreate({navigation: {navigate}}: Props){
 
                             <View style={styles.column}>
                                 <MediumInput 
-                                    maxLength={2}
+                                    maxLength={5}
                                     onChangeText={setWeight}    
                                 />
                             </View>

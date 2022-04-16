@@ -14,11 +14,9 @@ type Schedules = {
 
 type SchedulesContextData = {
     schedules: Schedules;
-    setSchedules: (schedules: Schedules) => void
-    addSchedule: (newSchedule: ScheduleProps) => (ScheduleProps)[];
-    reagengeSchedules: (list: (ScheduleProps)[]) => (ScheduleProps)[]; 
-    sortSchedules: () => (ScheduleProps)[];
-
+    addSchedule: (newSchedule: ScheduleProps) => void;
+    deleteSchedule: (id: string) => void;
+    editSchedule: (id: string, schedule: ScheduleProps) => void
 }
 
 type SchedulesProviderProps = {
@@ -79,12 +77,6 @@ function SchedulesProvider({children}: SchedulesProviderProps){
         });
         return list;
     }
-
-    function addSchedule( newSchedule: ScheduleProps){
-        newSchedule.id = ((schedules.data.length)+1).toString();
-        schedules.data.push(newSchedule);
-        return sortSchedules();
-    }
     
     function sortSchedules(){
         let schedulesNumberHours = schedules.data.map(item=>{
@@ -107,9 +99,33 @@ function SchedulesProvider({children}: SchedulesProviderProps){
         })
         return bufferArr              
     }
+
+    function addSchedule( newSchedule: ScheduleProps){
+        newSchedule.id = ((schedules.data.length)+1).toString();
+        schedules.data.push(newSchedule);
+        const sortedSchedules = sortSchedules();
+        const rearangedSchedules = reagengeSchedules(sortedSchedules);
+        setSchedules({data: rearangedSchedules})
+    }
+
+    function deleteSchedule(id: string){
+        const a: number = +id;
+        schedules.data.splice(a-1,1);
+        setSchedules({data: reagengeSchedules(schedules.data)});
+    }
+
+    function editSchedule(id: string, schedule: ScheduleProps){
+        const a: number = +id;
+        let list = schedules.data;
+        list[a-1] = schedule;
+        setSchedules({data: reagengeSchedules(list)})
+        const sortedSchedules = sortSchedules();
+        const rearangedSchedules = reagengeSchedules(sortedSchedules);
+        setSchedules({data: rearangedSchedules})
+    }
     
     return(
-        <SchedulesContext.Provider value={{schedules,setSchedules,addSchedule,reagengeSchedules, sortSchedules}}>
+        <SchedulesContext.Provider value={{schedules,addSchedule,deleteSchedule,editSchedule}}>
             {children}
         </SchedulesContext.Provider>
     )

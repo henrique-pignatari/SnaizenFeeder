@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { GestureHandlerRootView, RectButton, ScrollView } from "react-native-gesture-handler";
 import { Header } from "../../components/Header";
@@ -11,16 +11,32 @@ import { styles } from "./styles";
 type Props = {
     route: {
         params: {
-            id? : string;
+            id : string;
         }
     }
+    navigation: {
+        navigate: Function
+    };
 }
 
-export function ScheduleEdit({route:{params:{id}}}: Props){
-    const {schedules} = useSchedules();
-    const schedule =schedules.data.find(item =>{return item.id === id}) as ScheduleProps;    
-    const [hour,minutes] = schedule.hour.split(':')
-    const weight = schedule.weight;
+export function ScheduleEdit({route:{params:{id}},navigation: {navigate}}: Props){
+    const {schedules,editSchedule} = useSchedules();
+    const schedule =schedules.data.find(item =>{return item.id === id}) as ScheduleProps;
+    const hourArr = schedule.hour.split(':');
+
+    const [hour,setHour] = useState(hourArr[0]);
+    const [minutes,setMinutes] = useState(hourArr[1]);
+    const [weight,setWeight] = useState(schedule.weight);
+    
+    function handleScheduleEdit(){
+        const newSchedule = {
+            id: '',
+            hour: `${hour}:${minutes}`,
+            weight,
+        };
+        editSchedule(id,newSchedule);
+        navigate('Home');
+    }
 
     return(
         <KeyboardAvoidingView
@@ -38,11 +54,19 @@ export function ScheduleEdit({route:{params:{id}}}: Props){
                             </Text>
 
                             <View style={styles.column}>
-                                <SmallInput maxLength={2} value={hour}/>
+                                <SmallInput 
+                                    maxLength={2} 
+                                    value={hour}
+                                    onChangeText={setHour}
+                                />
                                 <Text style={styles.divider}>
                                     :
                                 </Text>
-                                <SmallInput maxLength={2} value={minutes}/>
+                                <SmallInput 
+                                    maxLength={2} 
+                                    value={minutes}
+                                    onChangeText={setMinutes}
+                                />
                             </View>
                         </View>
 
@@ -52,13 +76,18 @@ export function ScheduleEdit({route:{params:{id}}}: Props){
                             </Text>
 
                             <View style={styles.column}>
-                                <MediumInput maxLength={2} value={weight}/>
+                                <MediumInput 
+                                    maxLength={5} 
+                                    value={weight}
+                                    onChangeText={setWeight}
+                                />
                             </View>
                         </View>
                     </View>
                     <GestureHandlerRootView>
                         <RectButton 
                             style={styles.confirmButton}
+                            onPress={handleScheduleEdit}
                         >
                             <Text style={styles.confirmText}>Confirmar</Text>
                         </RectButton>

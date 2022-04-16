@@ -18,7 +18,7 @@ type Props = {
 }
 
 export function Home({navigation: {navigate}}: Props){
-    let {addSchedule,reagengeSchedules,schedules,setSchedules} = useSchedules();
+    let {schedules,deleteSchedule} = useSchedules();
 
     const [render,setRender] = useState(true);
 
@@ -35,10 +35,7 @@ export function Home({navigation: {navigate}}: Props){
     };
     
     function handleScheduleDelete(id : string){
-        let a: number = +id;
-        schedules.data.splice(a-1,1);
-        reagengeSchedules(schedules.data);
-        renderScreen();
+       deleteSchedule(id);
     }
 
     const {on, primary} = theme.colors;
