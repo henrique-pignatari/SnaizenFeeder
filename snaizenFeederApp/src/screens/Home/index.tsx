@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
+import { BorderlessButton, GestureHandlerRootView } from "react-native-gesture-handler";
 import { Avatar } from "../../components/Avatar";
 import { Background } from "../../components/Background";
 import { ButtonAdd } from "../../components/ButtonAdd";
 import { ListDivider } from "../../components/ListDivider";
 import { ListHeader } from "../../components/ListHeader";
 import { Loading } from "../../components/Loading";
-import { Schedule, ScheduleProps } from "../../components/Schedule";
+import { Schedule } from "../../components/Schedule";
 import { theme } from "../../global/styles/theme";
 import { useSchedules } from "../../hooks/schedules";
 
+import AsyncStorage  from "@react-native-async-storage/async-storage";
+
 import { styles } from "./styles";
+import { COLLECTION_DEVICE } from "../../configs/database";
+import { DeviceProps } from "../ConnectionScreen";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = {
     navigation: {
@@ -19,10 +25,11 @@ type Props = {
 }
 
 export function Home({navigation: {navigate}}: Props){
-    let {schedules,deleteSchedule,loadSchedules} = useSchedules();
+    const {schedules,deleteSchedule,loadSchedules} = useSchedules();
+    const [isDeviceConnected, setIsdeviceConnected] = useState(true);
 
     function handleScheduleCreate(){
-        navigate('ScheduleCreate');
+        navigate("ScheduleCreate");
     };
 
     function handleScheduleEdit(id: string){
@@ -31,26 +38,40 @@ export function Home({navigation: {navigate}}: Props){
     
     function handleScheduleDelete(id : string){
        deleteSchedule(id);
-    }
+    }    
 
     const {on, primary} = theme.colors;
-    const [isDeviceConnected, setIsdeviceConnected] = useState(false);
     const [loading,setLoading] = useState(true);
 
-    useEffect(()=>{
+    function handleConnection(){
+        navigate("ConnectionScreen")
+    }
+
+    async function getDevice() {
+        const response = await AsyncStorage.getItem(COLLECTION_DEVICE);
+        const storage: DeviceProps = response ? JSON.parse(response).device : {isDeviceConnected: false};
+        setIsdeviceConnected(storage.isDeviceConnected);
+    }
+
+    useFocusEffect(useCallback(()=>{
         loadSchedules();
+        getDevice();
         setLoading(false);
-    },[])
+    },[]))
 
     return(
         <Background>
             <View style={styles.header}>
-            <Avatar urlImage="https://github.com/henrique-pignatari.png"/>
-            <Text style={[styles.status, {color: isDeviceConnected? on : primary }]}>
-                {
-                    isDeviceConnected? "Conectado" : "Desconectado"
-                }
-            </Text>    
+                <Avatar urlImage="https://github.com/henrique-pignatari.png"/>
+                <GestureHandlerRootView>
+                    <BorderlessButton onPress={handleConnection}>
+                        <Text style={[styles.status, {color: isDeviceConnected? on : primary }]}>
+                            {
+                                isDeviceConnected? "Conectado" : "Desconectado"
+                            }
+                        </Text>    
+                    </BorderlessButton>
+                </GestureHandlerRootView>
                 <ButtonAdd onPress={handleScheduleCreate}/>
             </View>
 
@@ -59,7 +80,7 @@ export function Home({navigation: {navigate}}: Props){
                 <Loading/>
                 :
                 <>
-                    <ListHeader title="Horarios agendados" subtitle={`Total ${3}`}/>
+                    <ListHeader title="Horarios agendados" subtitle={`Total ${schedules.data.length}`}/>
                     <FlatList
                         data={schedules.data}
                         keyExtractor={item => item.id}
