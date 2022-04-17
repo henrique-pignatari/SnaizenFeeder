@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 import { Avatar } from "../../components/Avatar";
 import { Background } from "../../components/Background";
 import { ButtonAdd } from "../../components/ButtonAdd";
 import { ListDivider } from "../../components/ListDivider";
 import { ListHeader } from "../../components/ListHeader";
+import { Loading } from "../../components/Loading";
 import { Schedule, ScheduleProps } from "../../components/Schedule";
 import { theme } from "../../global/styles/theme";
 import { useSchedules } from "../../hooks/schedules";
@@ -18,13 +19,7 @@ type Props = {
 }
 
 export function Home({navigation: {navigate}}: Props){
-    let {schedules,deleteSchedule} = useSchedules();
-
-    const [render,setRender] = useState(true);
-
-    function renderScreen(){
-        setRender(!render)
-    }
+    let {schedules,deleteSchedule,loadSchedules} = useSchedules();
 
     function handleScheduleCreate(){
         navigate('ScheduleCreate');
@@ -40,6 +35,12 @@ export function Home({navigation: {navigate}}: Props){
 
     const {on, primary} = theme.colors;
     const [isDeviceConnected, setIsdeviceConnected] = useState(false);
+    const [loading,setLoading] = useState(true);
+
+    useEffect(()=>{
+        loadSchedules();
+        setLoading(false);
+    },[])
 
     return(
         <Background>
@@ -53,20 +54,27 @@ export function Home({navigation: {navigate}}: Props){
                 <ButtonAdd onPress={handleScheduleCreate}/>
             </View>
 
-            <ListHeader title="Horarios agendados" subtitle="Total 3"/>
-            <FlatList
-                data={schedules.data}
-                keyExtractor={item => item.id}
-                renderItem={({item})=> (
-                    <Schedule
-                        handlers={{handleScheduleEdit,handleScheduleDelete}}
-                        data={item}
+            {
+                loading ?
+                <Loading/>
+                :
+                <>
+                    <ListHeader title="Horarios agendados" subtitle={`Total ${3}`}/>
+                    <FlatList
+                        data={schedules.data}
+                        keyExtractor={item => item.id}
+                        renderItem={({item})=> (
+                            <Schedule
+                                handlers={{handleScheduleEdit,handleScheduleDelete}}
+                                data={item}
+                            />
+                        )}
+                        ItemSeparatorComponent={() => <ListDivider/>}
+                        style={styles.schedules}
+                        showsVerticalScrollIndicator={false}
                     />
-                )}
-                ItemSeparatorComponent={() => <ListDivider/>}
-                style={styles.schedules}
-                showsVerticalScrollIndicator={false}
-            />
+                </>
+            }
         </Background>
     )
 }

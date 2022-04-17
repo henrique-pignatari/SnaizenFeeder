@@ -7,6 +7,8 @@ import React,
 } from "react";
 
 import {ScheduleProps} from "../components/Schedule"
+import AsyncStorage  from "@react-native-async-storage/async-storage";
+import { COLLECTION_SCHEDULES } from "../configs/database";
 
 type Schedules = {
     data: (ScheduleProps)[]
@@ -16,7 +18,8 @@ type SchedulesContextData = {
     schedules: Schedules;
     addSchedule: (newSchedule: ScheduleProps) => void;
     deleteSchedule: (id: string) => void;
-    editSchedule: (id: string, schedule: ScheduleProps) => void
+    editSchedule: (id: string, schedule: ScheduleProps) => void;
+    loadSchedules: () => Promise<void>;
 }
 
 type SchedulesProviderProps = {
@@ -100,32 +103,41 @@ function SchedulesProvider({children}: SchedulesProviderProps){
         return bufferArr              
     }
 
-    function addSchedule( newSchedule: ScheduleProps){
+    async function addSchedule( newSchedule: ScheduleProps){
         newSchedule.id = ((schedules.data.length)+1).toString();
         schedules.data.push(newSchedule);
         const sortedSchedules = sortSchedules();
         const rearangedSchedules = reagengeSchedules(sortedSchedules);
-        setSchedules({data: rearangedSchedules})
+        setSchedules({data: rearangedSchedules});
+        await AsyncStorage.setItem(COLLECTION_SCHEDULES,JSON.stringify(schedules));
     }
 
-    function deleteSchedule(id: string){
+    async function deleteSchedule(id: string){
         const a: number = +id;
         schedules.data.splice(a-1,1);
         setSchedules({data: reagengeSchedules(schedules.data)});
+        await AsyncStorage.setItem(COLLECTION_SCHEDULES,JSON.stringify(schedules));
     }
 
-    function editSchedule(id: string, schedule: ScheduleProps){
+    async function editSchedule(id: string, schedule: ScheduleProps){
         const a: number = +id;
         let list = schedules.data;
         list[a-1] = schedule;
         setSchedules({data: reagengeSchedules(list)})
         const sortedSchedules = sortSchedules();
         const rearangedSchedules = reagengeSchedules(sortedSchedules);
-        setSchedules({data: rearangedSchedules})
+        setSchedules({data: rearangedSchedules});
+        await AsyncStorage.setItem(COLLECTION_SCHEDULES,JSON.stringify(schedules));
     }
-    
+
+    async function loadSchedules(){
+        const response = await AsyncStorage.getItem(COLLECTION_SCHEDULES);
+        const storage: Schedules = response ? JSON.parse(response) : {data:[{}as ScheduleProps]};
+        setSchedules(storage);
+    }
+
     return(
-        <SchedulesContext.Provider value={{schedules,addSchedule,deleteSchedule,editSchedule}}>
+        <SchedulesContext.Provider value={{schedules,addSchedule,deleteSchedule,editSchedule,loadSchedules}}>
             {children}
         </SchedulesContext.Provider>
     )
