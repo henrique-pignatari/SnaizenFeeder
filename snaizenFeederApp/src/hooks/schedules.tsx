@@ -109,7 +109,12 @@ function SchedulesProvider({children}: SchedulesProviderProps){
         const sortedSchedules = sortSchedules();
         const rearangedSchedules = reagengeSchedules(sortedSchedules);
         setSchedules({data: rearangedSchedules});
-        await AsyncStorage.setItem(COLLECTION_SCHEDULES,JSON.stringify(schedules));
+        saveSchedules();
+    }
+
+    async function saveSchedules(){
+        const sortedSchedules = sortSchedules();
+        await AsyncStorage.setItem(COLLECTION_SCHEDULES,JSON.stringify({data: sortedSchedules}));
     }
 
     async function deleteSchedule(id: string){
@@ -127,7 +132,7 @@ function SchedulesProvider({children}: SchedulesProviderProps){
         const sortedSchedules = sortSchedules();
         const rearangedSchedules = reagengeSchedules(sortedSchedules);
         setSchedules({data: rearangedSchedules});
-        await AsyncStorage.setItem(COLLECTION_SCHEDULES,JSON.stringify(schedules));
+        saveSchedules();
     }
 
     async function loadSchedules(){
