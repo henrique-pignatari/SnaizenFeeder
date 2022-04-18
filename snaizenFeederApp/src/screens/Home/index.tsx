@@ -1,15 +1,22 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
+import { BorderlessButton, GestureHandlerRootView } from "react-native-gesture-handler";
 import { Avatar } from "../../components/Avatar";
 import { Background } from "../../components/Background";
 import { ButtonAdd } from "../../components/ButtonAdd";
 import { ListDivider } from "../../components/ListDivider";
 import { ListHeader } from "../../components/ListHeader";
-import { Schedule, ScheduleProps } from "../../components/Schedule";
+import { Loading } from "../../components/Loading";
+import { Schedule } from "../../components/Schedule";
 import { theme } from "../../global/styles/theme";
 import { useSchedules } from "../../hooks/schedules";
 
+import AsyncStorage  from "@react-native-async-storage/async-storage";
+
 import { styles } from "./styles";
+import { COLLECTION_DEVICE } from "../../configs/database";
+import { DeviceProps } from "../ConnectionScreen";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = {
     navigation: {
@@ -18,22 +25,11 @@ type Props = {
 }
 
 export function Home({navigation: {navigate}}: Props){
-    let {addSchedule,reagengeSchedules,schedules,setSchedules} = useSchedules();
-
-    const [render,setRender] = useState(true);
-
-    function renderScreen(){
-        setRender(!render)
-    }
+    const {schedules,deleteSchedule,loadSchedules} = useSchedules();
+    const [isDeviceConnected, setIsdeviceConnected] = useState(true);
 
     function handleScheduleCreate(){
-        const sche = {
-            id: '',
-            hour: '06:35',
-            weight: '2'
-        };
-        setSchedules({data: reagengeSchedules(addSchedule(sche))})
-        renderScreen();
+        navigate("ScheduleCreate");
     };
 
     function handleScheduleEdit(id: string){
@@ -41,41 +37,65 @@ export function Home({navigation: {navigate}}: Props){
     };
     
     function handleScheduleDelete(id : string){
-        let a: number = +id;
-        schedules.data.splice(a-1,1);
-        reagengeSchedules(schedules.data);
-        renderScreen()
-    }
+       deleteSchedule(id);
+    }    
 
     const {on, primary} = theme.colors;
-    const [isDeviceConnected, setIsdeviceConnected] = useState(false);
+    const [loading,setLoading] = useState(true);
+
+    function handleConnection(){
+        navigate("ConnectionScreen")
+    }
+
+    async function getDevice() {
+        const response = await AsyncStorage.getItem(COLLECTION_DEVICE);
+        const storage: DeviceProps = response ? JSON.parse(response).device : {isDeviceConnected: false};
+        setIsdeviceConnected(storage.isDeviceConnected);
+    }
+
+    useFocusEffect(useCallback(()=>{
+        loadSchedules();
+        getDevice();
+        setLoading(false);
+    },[]))
 
     return(
         <Background>
             <View style={styles.header}>
-            <Avatar urlImage="https://github.com/henrique-pignatari.png"/>
-            <Text style={[styles.status, {color: isDeviceConnected? on : primary }]}>
-                {
-                    isDeviceConnected? "Conectado" : "Desconectado"
-                }
-            </Text>    
+                <Avatar urlImage="https://github.com/henrique-pignatari.png"/>
+                <GestureHandlerRootView>
+                    <BorderlessButton onPress={handleConnection}>
+                        <Text style={[styles.status, {color: isDeviceConnected? on : primary }]}>
+                            {
+                                isDeviceConnected? "Conectado" : "Desconectado"
+                            }
+                        </Text>    
+                    </BorderlessButton>
+                </GestureHandlerRootView>
                 <ButtonAdd onPress={handleScheduleCreate}/>
             </View>
 
-            <ListHeader title="Horarios agendados" subtitle="Total 3"/>
-            <FlatList
-                data={schedules.data}
-                keyExtractor={item => item.id}
-                renderItem={({item})=> (
-                    <Schedule
-                        handlers={{handleScheduleEdit,handleScheduleDelete}}
-                        data={item}
+            {
+                loading ?
+                <Loading/>
+                :
+                <>
+                    <ListHeader title="Horarios agendados" subtitle={`Total ${schedules.data.length}`}/>
+                    <FlatList
+                        data={schedules.data}
+                        keyExtractor={item => item.id}
+                        renderItem={({item})=> (
+                            <Schedule
+                                handlers={{handleScheduleEdit,handleScheduleDelete}}
+                                data={item}
+                            />
+                        )}
+                        ItemSeparatorComponent={() => <ListDivider/>}
+                        style={styles.schedules}
+                        showsVerticalScrollIndicator={false}
                     />
-                )}
-                ItemSeparatorComponent={() => <ListDivider/>}
-                style={styles.schedules}
-                showsVerticalScrollIndicator={false}
-            />
+                </>
+            }
         </Background>
     )
 }
