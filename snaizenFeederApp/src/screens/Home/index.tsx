@@ -67,6 +67,12 @@ export function Home({navigation: {navigate}}: Props){
                     <BorderlessButton onPress={handleConnection}>
                         <Text style={[styles.status, {color: isDeviceConnected? on : primary }]}>
                             {
+                                console.log(new Blob([JSON.stringify(schedules)]).size)
+                            }
+                            {
+                                console.log(JSON.stringify(schedules))
+                            }
+                            {
                                 isDeviceConnected? "Conectado" : "Desconectado"
                             }
                         </Text>    
