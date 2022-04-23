@@ -4,41 +4,30 @@
 #include <WiFiServer.h>
 #include <WiFiUdp.h>
 #include <LiquidCrystal.h>
-#include <EEPROM.h>
 #include "RTClib.h"
 
 boolean horariosConfigurados;
 
 void setup() {
   Serial.begin(9600);
-  inicializarWIFI();
-  inicializarRelogio();
-  inicializarBluetooth();
-  inicializarCelulaDeCarga();
-  horariosConfigurados = conferirHorarios();
+  initWIFI();
+  initClock();
+  initCells();
 }
 
 void loop() {
-  if(false){//TEMP  Se há informções chegando na serial
-    
-  }
-  if(horariosConfigurados){
-    //todo o resto da aplicacao
-  }else{
-    emitirMensagemLCD("Sincronizar Relogio");
-  }
 
 }
 
 //Rotinas de inicialização
-void inicializarWIFI(){
+void initWIFI(){
   Serial.println("Inicializando o WIFI"); //TEMP
   if(!true){//Se o wifi não conectar
     emitirMensagemLCDTemporizada("Falha na conexao com o wifi",35);
   }
 }
 
-void inicializarRelogio(){
+void initClock(){
   Serial.println("Inicializando o relogio"); //TEMP
   Serial.println("Conferindo se o horario continua sincronizado");
   
@@ -48,28 +37,9 @@ void inicializarRelogio(){
   Serial.println("Fim inicializar Relogio");
 }
 
-void inicializarBluetooth(){
-  Serial.println("Inicializando o Bluetooth"); //TEMP
-}
-
-void inicializarCelulaDeCarga(){
+void initCells(){
   Serial.println("Inicializando celula de carga"); //TEMP
 }
-
-boolean conferirHorarios(){//retorna true se há horarios cnfigurados ou false se nao
-  Serial.println("Conferindo se ha horarios cadastrados"); //TEMP
-  Serial.println("Conferindo integridade dos dados");
-  String horarios[] = {"12:30"};
-  String horariosSanitizados = sanitizarHorarios(horarios);
-  Serial.println("Fim conferencia horarios");
-  return true;
-}
-
-String sanitizarHorarios(String a[]){
-  Serial.println("Sanitizando horarios");
-  return a[0];
-}
-
 
 //Celula de carga
 

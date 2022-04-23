@@ -1,11 +1,10 @@
 {
   "name": "snaizenfeederapp",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "react-native start",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
     "web": "expo start --web",
     "eject": "expo eject"
   },
@@ -19,10 +18,13 @@
     "expo-app-loading": "~1.3.0",
     "expo-font": "~10.0.4",
     "expo-linear-gradient": "~11.0.3",
+    "expo-splash-screen": "~0.14.1",
     "expo-status-bar": "~1.2.0",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "0.64.3",
+    "react-native-base64": "^0.2.1",
+    "react-native-ble-plx": "^2.0.3",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-iphone-x-helper": "^1.3.1",
     "react-native-safe-area-context": "3.3.2",
@@ -34,6 +36,7 @@
     "@babel/core": "^7.12.9",
     "@types/react": "~17.0.21",
     "@types/react-native": "~0.64.12",
+    "@types/react-native-base64": "^0.2.0",
     "typescript": "~4.3.5"
   },
   "private": true

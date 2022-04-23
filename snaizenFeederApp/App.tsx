@@ -7,6 +7,7 @@ import { Rajdhani_500Medium, Rajdhani_700Bold } from "@expo-google-fonts/rajdhan
 import AppLoading from "expo-app-loading";
 
 import { Routes } from './src/routes';
+import { DeviceProvider } from './src/hooks/device';
 import { SchedulesProvider } from './src/hooks/schedules';
 
 export default function App() {
@@ -28,9 +29,11 @@ export default function App() {
         backgroundColor="transparent"
         translucent
       />
-      <SchedulesProvider>
-        <Routes/>
-      </SchedulesProvider>
+      <DeviceProvider>
+        <SchedulesProvider>
+          <Routes/>
+        </SchedulesProvider>
+      </DeviceProvider>
     </>
   );
 }
