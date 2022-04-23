@@ -29,6 +29,7 @@ void loop() {
   if(Serial.available() > 0){
     String schedulesJsonString = readFromSerial();
     JsonArray schedulesArray = getSchedulesInfos(schedulesJsonString);
+    printSchedulesInfos(schedulesArray);
   }
 }
 
