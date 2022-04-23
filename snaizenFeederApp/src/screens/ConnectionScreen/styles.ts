@@ -20,4 +20,9 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 24,
         marginTop: 40,
     },
+    infoText: {
+        fontFamily: theme.fonts.title500,
+        fontSize: 16,
+        color: theme.colors.highlight,
+    }
 })

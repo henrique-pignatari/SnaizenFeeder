@@ -30,7 +30,25 @@ class CharacteristicsCallbacks : public BLECharacteristicCallbacks
   void onWrite(BLECharacteristic *pCharacteristic)
   {
     if(pCharacteristic == message_characteristic){
-      Serial.println(pCharacteristic->getValue().c_str());
+      String value = pCharacteristic->getValue().c_str();
+      
+      if(value.startsWith("a")){
+          String subString = value.substring(1);
+          String line = "";
+          if(subString.startsWith("d")){
+            Serial.println("Deleting from SD card");
+            subString = subString.substring(1);
+          }
+          if(!subString.endsWith("f")){
+            line = "l";
+          }
+          subString.concat(line);
+          Serial.println(subString);
+      }else if(value.startsWith("b")){
+        Serial.println("SENDING DATA");
+        message_characteristic->setValue("3.5");
+        message_characteristic->notify();
+      }
     }
   }
 };

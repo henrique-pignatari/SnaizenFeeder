@@ -6,9 +6,11 @@ import React,
     useState
 } from "react";
 import { LogBox, PermissionsAndroid } from "react-native";
+import AsyncStorage  from "@react-native-async-storage/async-storage";
 
 import base64  from 'react-native-base64';
 import { BleManager, Device } from 'react-native-ble-plx';
+import { COLLECTION_SCHEDULES } from "../configs/database";
 
 LogBox.ignoreLogs(['new NativeEventEmitter']);
 LogBox.ignoreAllLogs();
@@ -19,10 +21,11 @@ const MESSAGE_UUID = '6d68efe5-04b6-4a85-abc4-c2670b7bf7fd';
 
 type DeviceContextData ={
     device: Device;
-    sendMessage: (value: string)=>Promise<void>;
+    message: string;
+    isConnected: boolean;
     scanDevices: ()=>void;
     disconnectDevice: ()=>void;
-    isConnected: boolean;
+    sendMessage: (value: string)=>Promise<void>;
 }
 
 type DeviceProviderProps ={
@@ -33,8 +36,9 @@ export const DeviceContext = createContext({} as DeviceContextData);
 
 function DeviceProvider({children}: DeviceProviderProps){
     const [device, setDevice] = useState<Device>({} as Device);
-    const [message, setMessage] = useState('Nothing Yet');
+    const [message, setMessage] = useState('');
     const [isConnected, setIsConnected] = useState(false);
+    let dataReceived = '';
 
     async function scanDevices() {
         PermissionsAndroid.request(
@@ -47,9 +51,7 @@ function DeviceProvider({children}: DeviceProviderProps){
             buttonPositive: 'OK',
           },
         ).then(answere => {
-          console.log('scanning');
-          // display the Activityindicator
-    
+
           BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
             if (error) {
               console.warn(error);
@@ -68,19 +70,15 @@ function DeviceProvider({children}: DeviceProviderProps){
         });
     }
     
-    // handle the device disconnection (poorly)
     async function disconnectDevice() {
-    console.log('Disconnecting start');
 
     if (device != null) {
         const isDeviceConnected = await device.isConnected();
         if (isDeviceConnected) {
-        BLTManager.cancelTransaction('messagetransaction');
-        BLTManager.cancelTransaction('nightmodetransaction');
+            BLTManager.cancelTransaction('messagetransaction');
+            BLTManager.cancelTransaction('nightmodetransaction');
 
-        BLTManager.cancelDeviceConnection(device.id).then(() =>
-            console.log('DC completed'),
-        );
+            BLTManager.cancelDeviceConnection(device.id).then(() =>{});
         }
 
         const connectionStatus = await device.isConnected();
@@ -97,14 +95,10 @@ function DeviceProvider({children}: DeviceProviderProps){
             SERVICE_UUID,
             MESSAGE_UUID,
             base64.encode(value),
-        ).then(characteristic => {
-            console.log('Boxvalue changed to :', base64.decode(characteristic.value as string));
-        });
+        ).then(characteristic => {});
     }
-    //Connect the device and start monitoring characteristics
+    
     async function connectDevice(device: Device) {
-        console.log('connecting to Device:', device.name);
-
         device
             .connect()
             .then(device => {
@@ -113,44 +107,41 @@ function DeviceProvider({children}: DeviceProviderProps){
             return device.discoverAllServicesAndCharacteristics();
             })
             .then(device => {
-            //  Set what to do when DC is detected
             BLTManager.onDeviceDisconnected(device.id, (error, device) => {
-                console.log('Device DC');
                 setIsConnected(false);
             });
-
-            //Read inital values
-
-            //Message
-            // device
-            //   .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
-            //   .then(valenc => {
-            //     setMessage(base64.decode(valenc?.value as string));
-            //   });
-
-            //monitor values and tell what to do when receiving an update
-
-            //Message
+            
             device.monitorCharacteristicForService(
                 SERVICE_UUID,
                 MESSAGE_UUID,
                 (error, characteristic) => {
-                if (characteristic?.value != null) {
-                    setMessage(base64.decode(characteristic?.value));
-                    console.log(
-                    'Message update received: ',
-                    base64.decode(characteristic?.value),
-                    );
-                }
+                    if (characteristic?.value != null) {
+                        //handleDataReceive(base64.decode(characteristic?.value));
+                        handleDataReceive(`{"id":"1","hour":"08:36","weight":"25"},{"id":"2","hour":"12:66","weight":"3"},{"id":"3","hour":"15:36","weight":"25"},{"id":"4","hour":"16:25","weight":"3"},{"id":"5","hour":"26:12","weight":"39"},{"id":"6","hour":"26:12","weight":"39"}f`);
+                    }
                 },
                 'messagetransaction',
             );
-            console.log('Connection established');
         });
+
+    }
+
+    async function setSchedules(schedules: string) {
+        const newData = `{"data":[${schedules}]}`
+        setMessage(newData);
+        await AsyncStorage.setItem(COLLECTION_SCHEDULES,newData)
+    }
+
+    function handleDataReceive(data: string){
+        dataReceived+=data;
+        if(data.endsWith('f')){
+            setSchedules(dataReceived.replace('f',''));
+            dataReceived = '';
+        }
     }
 
     return(
-        <DeviceContext.Provider value={{device,isConnected,sendMessage,scanDevices,disconnectDevice}}>
+        <DeviceContext.Provider value={{device,isConnected,message,sendMessage,scanDevices,disconnectDevice}}>
             {children}
         </DeviceContext.Provider>
     )
