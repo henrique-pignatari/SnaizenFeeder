@@ -43,6 +43,7 @@ class CharacteristicsCallbacks : public BLECharacteristicCallbacks
             line = "l";
           }
           subString.concat(line);
+          subString.replace("},{",("}\n{"));
           Serial.println(subString);
       }else if(value.startsWith("b")){
         Serial.println("SENDING DATA");
