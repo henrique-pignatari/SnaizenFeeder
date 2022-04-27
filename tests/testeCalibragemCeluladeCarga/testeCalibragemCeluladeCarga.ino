@@ -7,7 +7,7 @@ long int value;
 HX711 scale;
 
 void setup() {
-  Serial.begin(38400);
+  Serial.begin(115200);
   Serial.println("HX711 Demo");
 
   Serial.println("Initializing the scale");
