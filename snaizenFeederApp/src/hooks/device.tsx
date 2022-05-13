@@ -116,8 +116,8 @@ function DeviceProvider({children}: DeviceProviderProps){
                 MESSAGE_UUID,
                 (error, characteristic) => {
                     if (characteristic?.value != null) {
-                        //handleDataReceive(base64.decode(characteristic?.value));
-                        handleDataReceive(`{"id":"1","hour":"08:36","weight":"25"},{"id":"2","hour":"12:66","weight":"3"},{"id":"3","hour":"15:36","weight":"25"},{"id":"4","hour":"16:25","weight":"3"},{"id":"5","hour":"26:12","weight":"39"},{"id":"6","hour":"26:12","weight":"39"}f`);
+                        handleDataReceive(base64.decode(characteristic?.value));
+                        //handleDataReceive(`{"id":"1","hour":"08:36","weight":"25"},{"id":"2","hour":"12:66","weight":"3"},{"id":"3","hour":"15:36","weight":"25"},{"id":"4","hour":"16:25","weight":"3"},{"id":"5","hour":"26:12","weight":"39"},{"id":"6","hour":"26:12","weight":"39"}f`);
                     }
                 },
                 'messagetransaction',
@@ -127,14 +127,14 @@ function DeviceProvider({children}: DeviceProviderProps){
     }
 
     async function setSchedules(schedules: string) {
-        const newData = `{"data":[${schedules}]}`
-        setMessage(newData);
-        await AsyncStorage.setItem(COLLECTION_SCHEDULES,newData)
+        setMessage(schedules);
+        await AsyncStorage.setItem(COLLECTION_SCHEDULES,schedules);
     }
 
     function handleDataReceive(data: string){
         dataReceived+=data;
-        if(data.endsWith('f')){
+        setMessage(dataReceived);
+        if(dataReceived.endsWith('f')){
             setSchedules(dataReceived.replace('f',''));
             dataReceived = '';
         }
