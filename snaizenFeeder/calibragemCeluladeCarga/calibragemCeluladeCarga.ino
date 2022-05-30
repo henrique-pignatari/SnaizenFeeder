@@ -2,7 +2,7 @@
 
 HX711 balanca;                                                                        
 
-float calibration_factor = -17775.00;                                                        
+float calibration_factor = -23500.00;                                                        
 float peso;                                                                                 
 
 void setup() {                                                                              
@@ -28,10 +28,10 @@ void loop() {
   balanca.set_scale(calibration_factor);                                                    
 
   Serial.print("Peso: ");                                                                   
-  peso = balanca.get_units(10);                                                           
+  peso = balanca.get_units(), 10;                                                         
   if (peso < 0)                                                                             
   {
-    peso = 0.00;                                                                            
+    //peso = 0.00;                                                                            
   }                                                  
   Serial.print(peso);                                                                       
   Serial.print(" kg");                                                                      

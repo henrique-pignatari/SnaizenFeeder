@@ -4,35 +4,42 @@
 #include <SD.h>
 #include <SPI.h>
 #include "Wire.h"
+#include "HX711.h"
+
+HX711 scale;
 
 #define CS_PIN 53
-#define buttonPin 31
-#define relayPin 30
+#define sensorPin 27
 #define changePin 29
 #define DS1307_ADDRESS 0x68
 #define LCD_ADDRESS 0x3F
-#define SERVO 2
+#define SERVO 4
 
-bool buttonState,lastButtonState;
 bool SDavailable = true;
 int nextId = 0;
 int nextHour, nextMinute;
 double nextWeight;
 char bufferArr[2];
-byte zero = 0x00; 
+byte zero = 0x00;
+ 
 int pos;
+
+float calibration_factor = -23550.00;                                                        
+float scaleWeight; 
+
+String state = "closed";
+String food = "done";
 
 LiquidCrystal_I2C lcd(LCD_ADDRESS,20,4);
 
 File file;
 Servo servo;
 
-
 void SelecionaDataeHora()   //Seta a data e a hora do DS1307
 {
-  byte segundos = 00; //Valores de 0 a 59
-  byte minutos = 56; //Valores de 0 a 59
-  byte horas = 8; //Valores de 0 a 23
+  byte segundos = 0; //Valores de 0 a 59
+  byte minutos = 49; //Valores de 0 a 59
+  byte horas = 14; //Valores de 0 a 23
   byte diadasemana = 1; //Valores de 0 a 6 - 0=Domingo, 1 = Segunda, etc.
   byte diadomes = 9; //Valores de 1 a 31
   byte mes = 5; //Valores de 1 a 12
@@ -58,50 +65,85 @@ byte ConverteParaBCD(byte val)
   return ( (val/10*16) + (val%10) );
 }
 
+void initScale(){
+  int seconds = 5;
+  for(int i = 0; i<seconds; i++){
+    printScaleWarnig(seconds-i);
+    delay(1000);
+  }
+                  
+  delay(1000);                                                                              
+  scale.set_scale();                                                                      
+  scale.tare();                                                                           
+
+  long zero_factor = scale.read_average();   
+}
+
 void setup() {
   Serial.begin(115200);
   Serial1.begin(115200);
   while(!Serial){}
   
   pinMode(CS_PIN, OUTPUT);
-  pinMode(buttonPin, INPUT);
-  pinMode(relayPin,OUTPUT);
   pinMode(changePin,OUTPUT);
+  
   digitalWrite(changePin,!SDavailable);
+  
+  servo.attach(SERVO);
+  servo.write(0);
+  
+  scale.begin(3, 2);
+  
   Wire.begin();
 
   lcd.init();
   lcd.backlight();
-
-  servo.attach(SERVO);
-  servo.write(0);
-  ///*SelecionaDataeHora()*/
-  selectSchedule(getHour(2));
+  
+  ///*SelecionaDataeHora();*/
+  initScale();
+  
+  
+  selectSchedule(getHour(2));  
+  lcd.clear();
 }
 
-void loop() {
-  if(checkHour()){
-    digitalWrite(relayPin,HIGH);
-    
-    for(pos = 0; pos < 90; pos++)
-    {
-      servo.write(pos);
-      delay(15);
-    }
-    
+void loop() {  
+  printHour(getHour(3));
+  
+  if(checkHour()){  
+    food = "waiting";  
   }
   
-  if(readConfirmButton()){
-    Serial.println("DESLIGANDO");
-    digitalWrite(relayPin,LOW);
-    for(pos = 90; pos >= 0; pos--)
-    {
-      servo.write(pos);
-      delay(15);
+  if(state == "open"){
+    if(digitalRead(sensorPin)){
+      Serial.println("Fechando 1");
+      for(pos; pos >= 0; pos--)
+      {
+        servo.write(pos);
+        delay(10);
+      }
+      state = "closed"; 
+    }else if(checkTargetWeight()){
+      Serial.println("Fechando 2");
+      for(pos; pos >= 0; pos--)
+      {
+        servo.write(pos);
+        delay(10);
+      }
+      food = "done";
+      state = "closed"; 
     }
   }
 
-  printHour(getHour(3));
+  if(state == "closed" && food == "waiting"&& !digitalRead(sensorPin)){
+    Serial.println("Abrindo 1");
+    for(pos; pos < 255; pos++)
+    {
+      servo.write(pos);
+      delay(10);
+    }  
+    state = "open"; 
+  }
 
   if(Serial1.available()){
     Serial1.readBytes(bufferArr,1);
@@ -120,6 +162,24 @@ void loop() {
       Serial1.print(nextMinute);
     }
   }
+}
+
+float getScaleWeight(){
+  scale.set_scale(calibration_factor);
+  scaleWeight = scale.get_units(), 10;                                                         
+  if (scaleWeight < 0)                                                                             
+  {
+    scaleWeight = 0.00;                                                                            
+  }
+  return scaleWeight;
+}
+
+void printScaleWarnig(int timeLeft){
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("ESVAZIAR");
+  lcd.setCursor(0,1);
+  lcd.print(timeLeft);  
 }
 
 void printHour(String nowHour){
@@ -146,6 +206,12 @@ void printHour(String nowHour){
     lcd.print("0");
   }
   lcd.print(sec);
+
+  lcd.setCursor(0,2);
+  lcd.print("Peso: ");
+  getScaleWeight();
+  lcd.print(scaleWeight);
+  delay(50);
 }
 
 boolean checkHour(){
@@ -161,16 +227,9 @@ boolean checkHour(){
   return LOW;
 }
 
-boolean readConfirmButton(){
-  buttonState = digitalRead(buttonPin);
-  
-  if (buttonState != lastButtonState) {
-    lastButtonState = buttonState;
-    delay(50);
-    return buttonState;
-  }else{
-    return LOW;
-  }
+boolean checkTargetWeight(){
+  getScaleWeight();
+  return scaleWeight >= nextWeight;
 }
 
 byte convertToDecimal(byte val)  
